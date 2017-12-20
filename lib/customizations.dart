@@ -5,19 +5,16 @@ import 'customizables.dart';
 import 'preferences.dart';
 
 class CustomizationsBottomSheet extends StatefulWidget {
-
   CustomizationsBottomSheet(this._customizables);
 
-  CustomizableFactors _customizables;
+  final CustomizableFactors _customizables;
 
   @override
   _CustomizationsState createState() => new _CustomizationsState();
 }
 
 class _CustomizationsState extends State<CustomizationsBottomSheet> {
-
   WrapItUpPrefs _prefs;
-
 
   _initPreferences() async {
     _prefs = await WrapItUpPrefs.getInstance();
@@ -41,6 +38,7 @@ class _CustomizationsState extends State<CustomizationsBottomSheet> {
 
   @override
   void initState() {
+    super.initState();
     _initPreferences();
   }
 
@@ -51,22 +49,22 @@ class _CustomizationsState extends State<CustomizationsBottomSheet> {
         new Expanded(
             child: Theme
                 .of(context)
-                .platform == TargetPlatform.android ?
-            new Slider(
+                .platform == TargetPlatform.android
+                ? new Slider(
               value: sliderValue,
               onChanged: onChangedCallback,
               min: min,
               max: max,
               divisions: stops,
               label: label,
-            ) : new CupertinoSlider(
+            )
+                : new CupertinoSlider(
               value: sliderValue,
               onChanged: onChangedCallback,
               min: min,
               max: max,
               divisions: stops,
-            )
-        );
+            ));
 
     final TextStyle fieldTitle = Theme
         .of(context)
@@ -117,6 +115,4 @@ class _CustomizationsState extends State<CustomizationsBottomSheet> {
       ),
     );
   }
-
-
 }

@@ -13,18 +13,15 @@ class WrapItUpBackground extends StatefulWidget {
   WrapItUpBackground(this._scaffoldKey);
 
   @override
-  State<StatefulWidget> createState() =>
-      new _WrapItUpBackgroundState();
+  State<StatefulWidget> createState() => new _WrapItUpBackgroundState();
 }
 
-class _WrapItUpBackgroundState extends State<WrapItUpBackground>
-    with SingleTickerProviderStateMixin {
-
+class _WrapItUpBackgroundState extends State<WrapItUpBackground> with SingleTickerProviderStateMixin {
   AnimationController controller;
   Animation<double> sizeTween;
 
-  final CustomizableFactors _customizables = new CustomizableFactors(
-      WrapItUpPrefs.DEFAULT_TIMER, WrapItUpPrefs.DEFAULT_SHARPNESS);
+  final CustomizableFactors _customizables =
+  new CustomizableFactors(WrapItUpPrefs.DEFAULT_TIMER, WrapItUpPrefs.DEFAULT_SHARPNESS);
 
   GestureLongPressCallback _showBottomSheetCallback;
 
@@ -45,17 +42,18 @@ class _WrapItUpBackgroundState extends State<WrapItUpBackground>
 
   _showBottomSheet() {
     debugPrint("trying to open bottomsheet");
-    setState(() { // disable the button
+    setState(() {
+      // disable the button
       _showBottomSheetCallback = null;
     });
     PersistentBottomSheetController<Null> persistentController =
-    widget._scaffoldKey.currentState
-        .showBottomSheet<Null>((BuildContext context) {
+    widget._scaffoldKey.currentState.showBottomSheet<Null>((BuildContext context) {
       return _bottomSheetView;
     });
     persistentController.closed.whenComplete(() {
       if (mounted) {
-        setState(() { // re-enable the button
+        setState(() {
+          // re-enable the button
           _showBottomSheetCallback = _showBottomSheet;
         });
       }
@@ -64,22 +62,18 @@ class _WrapItUpBackgroundState extends State<WrapItUpBackground>
 
   @override
   void initState() {
+    super.initState();
     debugPrint("initstate being called");
     _showBottomSheetCallback = _showBottomSheet;
     this._bottomSheetView = new CustomizationsBottomSheet(_customizables);
 
     _initFromPrefs();
 
-    controller = new AnimationController(
-        duration: new Duration(milliseconds: _customizables.timer),
-        vsync: this);
+    controller = new AnimationController(duration: new Duration(milliseconds: _customizables.timer), vsync: this);
 
-    CurvedAnimation curvedAnimation = new CurvedAnimation(
-        parent: controller, curve: Curves.bounceOut);
+    CurvedAnimation curvedAnimation = new CurvedAnimation(parent: controller, curve: Curves.bounceOut);
 
-    sizeTween =
-        new Tween<double>(begin: 0.2, end: 0.8)
-            .animate(curvedAnimation);
+    sizeTween = new Tween<double>(begin: 0.2, end: 0.8).animate(curvedAnimation);
 
     curvedAnimation.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
@@ -96,9 +90,9 @@ class _WrapItUpBackgroundState extends State<WrapItUpBackground>
   AnimatedFlashyBackground build(BuildContext context) {
     debugPrint("${_customizables.timer},${_customizables.sharpness} - Trying to redraw the flashy background");
     return new AnimatedFlashyBackground(
-      animation: sizeTween,
-      openBottomSheet: _showBottomSheetCallback,
-      innerStop: _customizables.sharpness,
+      sizeTween,
+      _showBottomSheetCallback,
+      _customizables.sharpness,
     );
   }
 
@@ -107,26 +101,21 @@ class _WrapItUpBackgroundState extends State<WrapItUpBackground>
     controller.dispose();
     super.dispose();
   }
-
-
 }
 
 class AnimatedFlashyBackground extends AnimatedWidget {
-  GestureLongPressCallback _bottomSheetNeedsToOpenMethod;
+  final GestureLongPressCallback _bottomSheetNeedsToOpenMethod;
 
-  int _innerStop;
+  final int _innerStop;
 
-  AnimatedFlashyBackground({Key key, Animation<
-      double> animation, VoidCallback openBottomSheet, int innerStop})
-      : super(key: key, listenable: animation) {
-    this._bottomSheetNeedsToOpenMethod = openBottomSheet;
-    this._innerStop = innerStop;
-  }
+  AnimatedFlashyBackground(Animation<double> animation, this._bottomSheetNeedsToOpenMethod, this._innerStop, [Key key])
+      : super(key: key, listenable: animation);
 
   @override
   Widget build(BuildContext context) {
     Animation<double> radiusAnimation = listenable;
-    final String wrapItUpText = MediaQuery
+    final String wrapItUpText =
+    MediaQuery
         .of(context)
         .orientation == Orientation.portrait ? "WRAP\nIT\nUP" : "WRAP IT UP";
 
@@ -138,9 +127,7 @@ class AnimatedFlashyBackground extends AnimatedWidget {
                 colors: [Colors.amber.shade50, Colors.amber],
                 center: Alignment.center,
                 radius: radiusAnimation.value,
-                stops: [_innerStop / 100, 1.0]
-            )
-        ),
+                stops: [_innerStop / 100, 1.0])),
         child: new Center(
           child: new Text(
             wrapItUpText,
@@ -154,5 +141,4 @@ class AnimatedFlashyBackground extends AnimatedWidget {
       ),
     );
   }
-
 }

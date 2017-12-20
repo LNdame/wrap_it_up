@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class WrapItUpPrefs {
-
   static const int DEFAULT_TIMER = 800;
   static const int DEFAULT_SHARPNESS = 0;
 
@@ -36,10 +35,6 @@ class WrapItUpPrefs {
   int getAntiBlur() {
     return _sharedPref?.getInt(_PrefTypes.blur.toString()) ?? DEFAULT_SHARPNESS;
   }
-
 }
 
-enum _PrefTypes {
-  timer,
-  blur
-}
+enum _PrefTypes { timer, blur }

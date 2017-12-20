@@ -10,10 +10,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return new MaterialApp(
       title: 'Stop changing the app',
-      theme: new ThemeData(
-          primarySwatch: Colors.amber,
-          accentColor: Colors.amberAccent
-      ),
+      theme: new ThemeData(primarySwatch: Colors.amber, accentColor: Colors.amberAccent),
       home: new MyScaffoldWrapper(),
     );
   }
@@ -29,9 +26,6 @@ class _MyScaffoldWrapperState extends State<MyScaffoldWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-        key: _scaffoldKey,
-        body: new WrapItUpBackground(_scaffoldKey)
-    );
+    return new Scaffold(key: _scaffoldKey, body: new WrapItUpBackground(_scaffoldKey));
   }
 }
