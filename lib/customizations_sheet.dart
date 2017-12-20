@@ -22,7 +22,6 @@ class _CustomizationsState extends State<CustomizationsBottomSheet> {
 
   void _whenTimerSliderChanged(double value) {
     _prefs.saveTimer(value.floor());
-    debugPrint("Animation timer has been set to - " + value.floor().toString());
     setState(() {
       widget._customizables.timer = value.floor();
     });
@@ -30,7 +29,6 @@ class _CustomizationsState extends State<CustomizationsBottomSheet> {
 
   void _whenAntiBlurSliderChanged(double value) {
     _prefs.saveAntiBlur(value.floor());
-    debugPrint("Blur stop has been set to - " + value.floor().toString());
     setState(() {
       widget._customizables.sharpness = value.floor();
     });

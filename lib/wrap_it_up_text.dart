@@ -4,7 +4,7 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
 
 import 'customizables.dart';
-import 'customizations.dart';
+import 'customizations_sheet.dart';
 import 'preferences.dart';
 
 class WrapItUpBackground extends StatefulWidget {
@@ -31,17 +31,24 @@ class _WrapItUpBackgroundState extends State<WrapItUpBackground> with SingleTick
     WrapItUpPrefs prefs = await WrapItUpPrefs.getInstance();
     int durationTimer = prefs.getTimer();
     int blur = prefs.getAntiBlur();
-    setState(() {
-      _customizables.timer = durationTimer;
-      //TODO ahhhh! how do i fix this? i dont want to create new objects every time
-      controller.duration = new Duration(milliseconds: _customizables.timer);
+    debugPrint("Preference values - $durationTimer , $blur");
+    _refreshAnimations(duration: durationTimer, blur: blur);
+  }
 
-      _customizables.sharpness = blur;
+  _refreshAnimations({int duration, int blur}) {
+    setState(() {
+      if (duration != null) {
+        _customizables.timer = duration;
+        //TODO ahhhh! how do i fix this? i dont want to create new objects every time
+        controller.duration = new Duration(milliseconds: _customizables.timer);
+      }
+      if (blur != null) {
+        _customizables.sharpness = blur;
+      }
     });
   }
 
   _showBottomSheet() {
-    debugPrint("trying to open bottomsheet");
     setState(() {
       // disable the button
       _showBottomSheetCallback = null;
@@ -60,21 +67,30 @@ class _WrapItUpBackgroundState extends State<WrapItUpBackground> with SingleTick
     });
   }
 
+  void _animationTimerHasChanged() {
+    debugPrint("Timer has changed - ${_customizables.timer}");
+    _refreshAnimations(duration: _customizables.timer);
+  }
+
+  void _animationBlurHasChanged() {
+    debugPrint("Blur has changed - ${_customizables.sharpness}");
+    _refreshAnimations(blur: _customizables.sharpness);
+  }
+
   @override
   void initState() {
     super.initState();
-    debugPrint("initstate being called");
+
     _showBottomSheetCallback = _showBottomSheet;
+    _customizables.getTimerNotifier().addListener(_animationTimerHasChanged);
+    _customizables.getSharpnessNotifier().addListener(_animationBlurHasChanged);
     this._bottomSheetView = new CustomizationsBottomSheet(_customizables);
 
     _initFromPrefs();
 
     controller = new AnimationController(duration: new Duration(milliseconds: _customizables.timer), vsync: this);
-
     CurvedAnimation curvedAnimation = new CurvedAnimation(parent: controller, curve: Curves.bounceOut);
-
     sizeTween = new Tween<double>(begin: 0.2, end: 0.8).animate(curvedAnimation);
-
     curvedAnimation.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         new Timer(new Duration(milliseconds: 500), () => controller.reverse());
@@ -82,24 +98,24 @@ class _WrapItUpBackgroundState extends State<WrapItUpBackground> with SingleTick
         new Timer(new Duration(seconds: 1), () => controller.forward());
       }
     });
-
     controller.forward();
-  }
-
-  @override
-  AnimatedFlashyBackground build(BuildContext context) {
-    debugPrint("${_customizables.timer},${_customizables.sharpness} - Trying to redraw the flashy background");
-    return new AnimatedFlashyBackground(
-      sizeTween,
-      _showBottomSheetCallback,
-      _customizables.sharpness,
-    );
   }
 
   @override
   void dispose() {
     controller.dispose();
+    _customizables.getTimerNotifier().removeListener(_animationTimerHasChanged);
+    _customizables.getSharpnessNotifier().removeListener(_animationBlurHasChanged);
     super.dispose();
+  }
+
+  @override
+  AnimatedFlashyBackground build(BuildContext context) {
+    return new AnimatedFlashyBackground(
+      animation: sizeTween,
+      openBottomSheet: _showBottomSheetCallback,
+      innerStop: _customizables.sharpness,
+    );
   }
 }
 
@@ -108,8 +124,10 @@ class AnimatedFlashyBackground extends AnimatedWidget {
 
   final int _innerStop;
 
-  AnimatedFlashyBackground(Animation<double> animation, this._bottomSheetNeedsToOpenMethod, this._innerStop, [Key key])
-      : super(key: key, listenable: animation);
+  AnimatedFlashyBackground({Key key, Animation<double> animation, VoidCallback openBottomSheet, int innerStop})
+      : this._bottomSheetNeedsToOpenMethod = openBottomSheet,
+        this._innerStop = innerStop,
+        super(key: key, listenable: animation);
 
   @override
   Widget build(BuildContext context) {
